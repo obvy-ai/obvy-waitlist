@@ -2,7 +2,6 @@ export default {
     async fetch(request, env) {
         const allowedOrigins = [
             'http://localhost:5173', 
-            'https://thiswillmakeyoulessdumb.com',
             'https://www.obvy.ai',
             'https://obvy-waitlist.pages.dev', // Cloudflare Pages
             // Add more domains as needed
@@ -10,7 +9,11 @@ export default {
 
         // Get the origin from the request
         const origin = request.headers.get('Origin');
-        const isAllowedOrigin = allowedOrigins.includes(origin);
+        
+        // Check for exact match or wildcard match for thiswillmakeyoulessdumb.com
+        const isAllowedOrigin = allowedOrigins.includes(origin) || 
+            (origin && origin.includes('thiswillmakeyoulessdumb.com')) ||
+            origin === 'https://thiswillmakeyoulessdumb.com';
 
         // CORS headers for all responses
         const corsHeaders = {
