@@ -108,3 +108,9 @@ Subscribe email to newsletter
   "message": "Successfully subscribed to newsletter"
 }
 ```
+
+### 
+
+```bash
+npm run deploy
+```
