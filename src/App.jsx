@@ -7,13 +7,30 @@ import './App.css'
 function App() {
   const [email, setEmail] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
     if (email) {
-      setIsSubmitted(true)
-      // Here you would typically send the email to your backend
-      console.log('Email submitted:', email)
+      setIsLoading(true)
+      try {
+        const res = await fetch("https://beehiiv-subscribe-proxy.obvy-ai.workers.dev", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        })
+        const data = await res.json()
+        if (res.ok && data.success) {
+          setIsSubmitted(true)
+        } else {
+          setError(data.error || "Something went wrong. Please try again.")
+        }
+      } catch {
+        setError("Network error. Please try again.")
+      }
+      setIsLoading(false)
     }
   }
 
@@ -24,19 +41,19 @@ function App() {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-float"></div>
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float-delayed"></div>
       
-      <div className="relative z-10 container mx-auto px-4 py-16 min-h-screen flex flex-col justify-center">
+      <div className="relative z-10 container mx-auto px-4 pt-16 pb-8 min-h-screen flex flex-col justify-center">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-8 backdrop-blur-sm border border-blue-500/30">
+          <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-4 backdrop-blur-sm border border-blue-500/30">
             <Brain className="w-4 h-4" />
-            Launch in 2025
+            Launching September 2025
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent leading-tight">
             You're smarter than your AI.
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-8">
+          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed mb-2">
             Learn better by being the smartest in the room. With Obvy, you're not just a student, you're a teacher. 
             Our AI study partner is designed to be a little… slow. It's up to you to explain concepts, answer questions, 
             and guide it to the right conclusions.
@@ -45,6 +62,51 @@ function App() {
           <p className="text-lg text-blue-300 font-medium">
             In the process, you'll master any topic without even realizing it.
           </p>
+        </div>
+
+        {/* Waitlist form */}
+        <div className="max-w-md mx-auto w-full mb-22">
+          {!isSubmitted ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="relative">
+                <Input
+                  type="email"
+                  placeholder="Your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-6 py-6 text-xl bg-white/10 border-white/20 text-white placeholder:text-gray-400 rounded-xl backdrop-blur-sm focus:bg-white/15 focus:border-blue-400 transition-all duration-300"
+                  required
+                />
+              </div>
+              
+              {error && (
+                <div className="text-red-400 text-sm text-center p-2 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  {error}
+                </div>
+              )}
+              
+              <Button 
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-6 text-xl font-semibold bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                {isLoading ? (
+                  "Joining..."
+                ) : (
+                  <>
+                    Join the waitlist
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </>
+                )}
+              </Button>
+            </form>
+          ) : (
+            <div className="text-center p-8 bg-green-500/20 border border-green-500/30 rounded-xl backdrop-blur-sm">
+              <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
+              <h3 className="text-2xl font-semibold text-green-300 mb-2">You're on the list!</h3>
+              <p className="text-gray-300">We'll notify you when Obvy is ready to make you the smartest person in the room.</p>
+            </div>
+          )}
         </div>
 
         {/* Features */}
@@ -105,38 +167,6 @@ function App() {
               <p className="text-gray-400 text-sm">With Obvy, you're the expert. You're the one with all the answers.</p>
             </div>
           </div>
-        </div>
-
-        {/* Waitlist form */}
-        <div className="max-w-md mx-auto w-full">
-          {!isSubmitted ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="relative">
-                <Input
-                  type="email"
-                  placeholder="Your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-6 py-4 text-lg bg-white/10 border-white/20 text-white placeholder:text-gray-400 rounded-xl backdrop-blur-sm focus:bg-white/15 focus:border-blue-400 transition-all duration-300"
-                  required
-                />
-              </div>
-              
-              <Button 
-                type="submit"
-                className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-              >
-                Join the waitlist
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </form>
-          ) : (
-            <div className="text-center p-8 bg-green-500/20 border border-green-500/30 rounded-xl backdrop-blur-sm">
-              <CheckCircle className="w-16 h-16 text-green-400 mx-auto mb-4" />
-              <h3 className="text-2xl font-semibold text-green-300 mb-2">You're on the list!</h3>
-              <p className="text-gray-300">We'll notify you when Obvy is ready to make you the smartest person in the room.</p>
-            </div>
-          )}
         </div>
 
         {/* Footer */}

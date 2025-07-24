@@ -1,0 +1,5 @@
+name = "beehiiv-subscribe-proxy"
+main = "worker/index.js"
+compatibility_date = "2025-07-23"
+
+[vars]
